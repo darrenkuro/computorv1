@@ -2,7 +2,7 @@ mod math;
 mod parser;
 
 use std::env;
-use std::io::{self, Read};
+use std::io;
 
 fn main() -> Result<(), String> {
     let args: Vec<String> = env::args().collect();
@@ -16,8 +16,8 @@ fn main() -> Result<(), String> {
                 .map_err(|e| format!("Failed to read stdin: {}", e))?;
             buffer.trim().to_string()
         }
-        2 => args[1].clone(), // One argument -> use it
-        _ => return Err("Wrong number of arguments!".to_string()), // More than one -> error
+        2 => args[1].clone(),
+        _ => return Err("Wrong number of arguments!".to_string()),
     };
 
     match parser::parse(&input) {

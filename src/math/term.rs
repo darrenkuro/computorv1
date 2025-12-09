@@ -8,22 +8,37 @@ pub struct Term {
 
 impl Term {
     pub fn new(term: &str) -> Result<Self, String> {
-        let components: Vec<&str> = term.split("* X^").collect();
-        // If were to manage free form entries, do it here
-        if components.len() != 2 {
-            return Err(format!("Syntax Error: invalid term {term}!").to_string());
+        let asterisks = ['\u{002A}', '\u{2217}', '\u{2731}', '\u{204E}'];
+        let mut components: Vec<&str> = term
+            .split(|c| asterisks.contains(&c))
+            .filter(|s| !s.trim().is_empty())
+            .collect();
+
+        match components.len() {
+            1 if components[0].contains('X') => components.insert(0, "1"), // 'X', coefficient = 1
+            1 => components.push("X^0"), // No 'X', only number, degree = 0
+            2 => {}
+            _ => return Err("Syntax Error: invalid term structure!".to_string()),
         }
 
-        let c: Result<f32, _> = components[0].trim().parse();
-        let d: Result<u8, _> = components[1].trim().parse();
+        // Guaranteed to have two components now
+        let (coef_str, var_str) = (components[0].trim(), components[1].trim());
+        let var_str = if var_str == "X" { "X^1" } else { var_str }; // Normalize "X"
+        let degree_str = var_str
+            .strip_prefix("X^")
+            .ok_or("Syntax Error: expected prefix 'X^'")?;
 
-        match (c, d) {
-            (Ok(coefficient), Ok(degree)) => Ok(Self {
-                degree,
-                coefficient,
-            }),
-            _ => Err(format!("Syntax Error: invalid term {term}!")),
-        }
+        let coefficient: f32 = coef_str
+            .parse()
+            .map_err(|_| format!("Syntax Error: invalid coefficient '{coef_str}'"))?;
+        let degree: u8 = degree_str
+            .parse()
+            .map_err(|_| format!("Syntax Error: invalid degree '{degree_str}'"))?;
+
+        Ok(Self {
+            coefficient,
+            degree,
+        })
     }
 }
 
@@ -38,7 +53,7 @@ impl fmt::Display for Term {
 }
 
 #[cfg(test)]
-mod term {
+mod term_tests {
     #[test]
     fn print() {
         // let mut term = Term::new(10, 1.1);
