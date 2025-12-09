@@ -2,11 +2,22 @@ mod math;
 mod parser;
 
 use std::env;
+use std::io::{self, Read};
+
 fn main() -> Result<(), String> {
-    let input = if env::args().len() == 2 {
-        env::args().nth(1).unwrap()
-    } else {
-        return Err("Wrong arguments!".to_string());
+    let args: Vec<String> = env::args().collect();
+
+    let input = match args.len() {
+        1 => {
+            // Read from stdin
+            let mut buffer = String::new();
+            io::stdin()
+                .read_line(&mut buffer)
+                .map_err(|e| format!("Failed to read stdin: {}", e))?;
+            buffer.trim().to_string()
+        }
+        2 => args[1].clone(), // One argument -> use it
+        _ => return Err("Wrong number of arguments!".to_string()), // More than one -> error
     };
 
     match parser::parse(&input) {
