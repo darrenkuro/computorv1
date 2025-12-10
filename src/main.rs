@@ -21,8 +21,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut poly = parser::parse(&input)?;
 
-    println!("{:#?}", poly);
-
     println!("[ POLYNOMIAL DEGREE ] {}", poly.get_degree());
     println!("[    REDUCED FORM   ] {}", poly.print_reduced_form());
     println!(
