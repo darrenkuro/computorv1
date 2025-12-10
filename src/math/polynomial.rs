@@ -1,4 +1,3 @@
-use super::complex::Complex;
 use super::sqrt;
 use super::term::Term;
 
@@ -6,21 +5,20 @@ use super::term::Term;
 pub struct Polynomial {
     pub terms: Vec<Term>,
 }
-#[derive(Debug, Clone, PartialEq)]
-pub struct QuadraticResult<T> {
-    pub a: T,
-    pub b: T,
-    pub c: T,
-    pub discriminant: T,
-    pub roots: Vec<T>,
-}
 
-#[derive(Debug, Clone, PartialEq)]
-pub enum Solution<T> {
-    None,
-    Infinite,
-    One(T),
-    Two(T, T),
+fn fract_or_float(x: f32) -> String {
+    let tol = 1e-9;
+    for den in 1..=100 {
+        let num = (x * den as f32).round();
+        if (x - num / den as f32).abs() < tol {
+            if den == 1 {
+                return format!("{}", num as i32);
+            } else {
+                return format!("{}/{}", num as i32, den);
+            }
+        }
+    }
+    format!("{:.6}", x)
 }
 
 impl Polynomial {
@@ -100,18 +98,20 @@ impl Polynomial {
 
         match d {
             d if d > 0f32 => {
+                let (x1, x2) = ((-b - sqrt(d)) / (2f32 * a), (-b + sqrt(d)) / (2f32 * a));
                 println!("The discriminant is strictly positive, the two solutions are:");
-                let (ans1, ans2) = ((-b - sqrt(d)) / (2f32 * a), (-b + sqrt(d)) / (2f32 * a));
-                println!("{}, {}", ans1, ans2);
+                println!("{}", fract_or_float(x1));
+                println!("{}", fract_or_float(x2));
             }
             d if d < 0f32 => {
+                let (re, im) = (-b / (2f32 * a), sqrt(-d) / (2f32 * a));
                 println!("The discriminant is strictly negative, the two solutions are:");
-                println!("{} + {}i", -b / (2f32 * a), sqrt(-d) / (2f32 * a));
-                println!("{} - {}i", -b / (2f32 * a), sqrt(-d) / (2f32 * a));
+                println!("{} + {}i", fract_or_float(re), fract_or_float(im));
+                println!("{} - {}i", fract_or_float(re), fract_or_float(im));
             }
             _ => {
                 println!("The discriminant is strictly zero, the only solution is:");
-                println!("{}", -b / (2f32 * a));
+                println!("{}", fract_or_float(-b / (2f32 * a)));
             }
         }
     }
@@ -121,7 +121,7 @@ impl Polynomial {
         println!("\x1b[33m[ INTERMEDIATE STEP ] {} * X = {}\x1b[0m", a, -b);
         println!("\x1b[33m[ INTERMEDIATE STEP ] X = {} / {}\x1b[0m", -b, a);
         println!("The solution is:");
-        println!("{}", -b / a);
+        println!("{}", fract_or_float(-b / a));
     }
 
     pub fn try_solve(&self) {
