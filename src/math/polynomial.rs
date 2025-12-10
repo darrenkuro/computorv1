@@ -28,119 +28,78 @@ impl Polynomial {
             .max()
             .unwrap_or(0)
     }
+}
 
-    pub fn print_reduced_form(&mut self) -> String {
-        self.terms.sort_by_key(|term| term.degree);
+impl Polynomial {
+    fn format<F>(&mut self, f: F) -> String
+    where
+        F: Fn(&Term) -> String,
+    {
+        self.terms.sort_by_key(|t| t.degree);
 
-        let mut form: String = String::new();
-        for term in &mut self.terms {
+        let mut form = String::new();
+        for term in &self.terms {
             if term.degree == 0 {
-                form.push_str(&term.to_full_form());
-            } else if term.coefficient < 0f32 {
-                form.push_str(&format!(" {}", term.to_full_form()));
-            } else if term.coefficient > 0f32 {
-                form.push_str(&format!(" + {}", term.to_full_form()));
+                form.push_str(&f(term));
+            } else if term.coefficient < 0.0 {
+                form.push_str(&format!(" {}", f(term)));
+            } else if term.coefficient > 0.0 {
+                form.push_str(&format!(" + {}", f(term)));
             }
         }
         form.push_str(" = 0");
-
         form
+    }
+
+    pub fn print_reduced_form(&mut self) -> String {
+        self.format(|t| t.to_full_form())
     }
 
     pub fn print_free_form(&mut self) -> String {
-        self.terms.sort_by_key(|term| term.degree);
+        self.format(|t| t.to_free_form())
+    }
+}
 
-        let mut form: String = String::new();
-        for term in &mut self.terms {
-            if term.degree == 0 {
-                form.push_str(&term.to_free_form());
-            } else if term.coefficient < 0f32 {
-                form.push_str(&format!(" {}", term.to_free_form()));
-            } else if term.coefficient > 0f32 {
-                form.push_str(&format!(" + {}", term.to_free_form()));
-            }
-        }
-
-        form.push_str(" = 0");
-        form
+impl Polynomial {
+    fn coefs(&self) -> (f32, f32, f32) {
+        let coeff_for = |deg| {
+            self.terms
+                .iter()
+                .find(|t| t.degree == deg)
+                .map(|t| t.coefficient)
+                .unwrap_or(0.0)
+        };
+        (coeff_for(2), coeff_for(1), coeff_for(0))
     }
 
     fn solve_second_degree(&self) {
-        let (mut a, mut b, mut c) = (0f32, 0f32, 0f32);
-        let mut get_discriminant = |poly: &Polynomial| -> f32 {
-            for term in &poly.terms {
-                match term.degree {
-                    2 => a = term.coefficient,
-                    1 => b = term.coefficient,
-                    0 => c = term.coefficient,
-                    _ => (),
-                }
-            }
-            b * b - 4f32 * a * c
-        };
+        let (a, b, c) = self.coefs();
+        let d = b * b - 4f32 * a * c;
 
-        match get_discriminant(self) {
+        println!("\x1b[33m[ INTERMEDIATE STEP ] Discriminant = {b}² - 4 * {a} * {c} = {d}\x1b[0m");
+        println!("\x1b[33m[ INTERMEDIATE STEP ] X = (-{b} ± √{d}) / (2 * {a})\x1b[0m");
+
+        match d {
             d if d > 0f32 => {
-                println!(
-                    "\x1b[33m[ INTERMEDIATE STEP ] Discriminant = {}^2 - 4 * {} * {} = {}\x1b[0m",
-                    b, a, c, d
-                );
-                println!(
-                    "\x1b[33m[ INTERMEDIATE STEP] X = ±{} - sqrt({}) / (2 * {})\x1b[0m",
-                    b.abs(),
-                    d,
-                    a
-                );
                 println!("The discriminant is strictly positive, the two solutions are:");
                 println!("{}", (-b - sqrt(d)) / (2f32 * a));
                 println!("{}", (-b + sqrt(d)) / (2f32 * a));
             }
             d if d < 0f32 => {
-                println!(
-                    "\x1b[33m[ INTERMEDIATE STEP ] Discriminant = {}^2 - 4 * {} * {} = {}\x1b[0m",
-                    b, a, c, d
-                );
-                println!(
-                    "\x1b[33m[ INTERMEDIATE STEP ] X = ±{} - sqrt({}) / (2 * {})\x1b[0m",
-                    b.abs(),
-                    d,
-                    a
-                );
                 println!("The discriminant is strictly negative, the two solutions are:");
                 println!("{} + {}i", -b / (2f32 * a), sqrt(-d) / (2f32 * a));
                 println!("{} - {}i", -b / (2f32 * a), sqrt(-d) / (2f32 * a));
             }
-            d if d == 0f32 => {
-                println!(
-                    "\x1b[33m[ INTERMEDIATE STEP ] Discriminant = {}^2 - 4 * {} * {} = {}\x1b[0m",
-                    b, a, c, d
-                );
-                println!(
-                    "\x1b[33m[ INTERMEDIATE STEP ] X = ±{} - sqrt({}) / (2 * {})\x1b[0m",
-                    b.abs(),
-                    d,
-                    a
-                );
+            _ => {
                 println!("The discriminant is strictly zero, the only solution is:");
                 println!("{}", -b / (2f32 * a));
             }
-            _ => unreachable!(),
         }
     }
 
     fn solve_first_degree(&self) {
-        let (mut a, mut b) = (0f32, 0f32);
-        for term in &self.terms {
-            match term.degree {
-                1 => a = term.coefficient,
-                0 => b = term.coefficient,
-                _ => (),
-            }
-        }
-        println!(
-            "\x1b[33m[ INTERMEDIATE STEP ] {} * X^1 = {} * X^0\x1b[0m",
-            a, -b
-        );
+        let (_, a, b) = self.coefs();
+        println!("\x1b[33m[ INTERMEDIATE STEP ] {} * X = {}\x1b[0m", a, -b);
         println!("\x1b[33m[ INTERMEDIATE STEP ] X = {} / {}\x1b[0m", -b, a);
         println!("The solution is:");
         println!("{}", -b / a);
