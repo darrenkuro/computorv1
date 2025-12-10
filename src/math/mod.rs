@@ -21,7 +21,7 @@ pub fn sqrt(x: f64) -> f64 {
 }
 
 pub fn fract_or_float(x: f64) -> String {
-    let tol = 1e-9;
+    let tol = 1e-7;
     for den in 1..=100 {
         let num = (x * den as f64).round();
         if (x - num / den as f64).abs() < tol {
