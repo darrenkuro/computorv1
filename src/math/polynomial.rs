@@ -47,6 +47,10 @@ impl Polynomial {
                 form.push_str(&format!(" + {}", f(term)));
             }
         }
+        if form.is_empty() {
+            form.push('0');
+        }
+
         form.push_str(" = 0");
         form
     }

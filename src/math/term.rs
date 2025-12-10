@@ -7,7 +7,6 @@ pub struct Term {
 impl Term {
     pub fn new(term: &str) -> Result<Self, String> {
         let asterisks = ['\u{002A}', '\u{2217}', '\u{2731}', '\u{204E}'];
-        let term = term.trim().replace('x', "X"); // Accept both x and X
 
         // Check asterisk syntax ok before splitting
         if asterisks
