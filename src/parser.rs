@@ -34,7 +34,7 @@ pub fn parse(args: &str) -> Result<Polynomial, Box<dyn Error>> {
     for term in terms {
         match Term::parse(term) {
             Ok(term) => lhs.push_term(term),
-            Err(e) => return Err(e.into()),
+            Err(e) => return Err(e),
         }
     }
 
@@ -47,7 +47,7 @@ pub fn parse(args: &str) -> Result<Polynomial, Box<dyn Error>> {
     for term in terms {
         match Term::parse(term) {
             Ok(term) => rhs.push_term(term),
-            Err(e) => return Err(e.into()),
+            Err(e) => return Err(e),
         }
     }
     let mut res = lhs - rhs;

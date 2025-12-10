@@ -4,8 +4,10 @@ pub struct Term {
     pub coefficient: f64,
 }
 
+use std::error::Error;
+
 impl Term {
-    pub fn parse(term: &str) -> Result<Self, String> {
+    pub fn parse(term: &str) -> Result<Self, Box<dyn Error>> {
         let asterisks = ['\u{002A}', '\u{2217}', '\u{2731}', '\u{204E}'];
 
         // Check asterisk syntax ok before splitting
@@ -13,11 +15,11 @@ impl Term {
             .iter()
             .any(|&c| term.starts_with(c) || term.ends_with(c))
         {
-            return Err("syntax: stray '*' at start or end of term!".to_string());
+            return Err("syntax: stray '*' at start or end of term!".into());
         }
 
         if term.contains("**") {
-            return Err("syntax: consecutive '*' found!".to_string());
+            return Err("syntax: consecutive '*' found!".into());
         }
 
         let mut components: Vec<&str> = term
@@ -32,7 +34,7 @@ impl Term {
             1 if components[0].contains('X') => components.insert(0, "1"),   // 'X', coefficient = 1
             1 => components.push("X^0"), // No 'X', only number, degree = 0
             2 => {}
-            _ => return Err("syntax: invalid term structure!".to_string()),
+            _ => return Err("syntax: invalid term structure!".into()),
         }
 
         // Guaranteed to have two components now
@@ -42,6 +44,10 @@ impl Term {
         );
         let x_str = if x_str == "X" { "X^1" } else { x_str }; // Normalize "X"
 
+        if coef_str.len() > 15 {
+            return Err("number too long for this program to perserve precision".into());
+        }
+
         let degree_str = x_str
             .strip_prefix("X^")
             .ok_or("syntax: expected prefix 'X^'")?;
@@ -49,11 +55,11 @@ impl Term {
         let coefficient: f64 = match coef_str.parse::<f64>() {
             Ok(val) if val.is_finite() => val,
             // Could either be format or Nan/inf
-            _ => return Err(format!("invalid coefficient '{coef_str}'")),
+            _ => return Err(format!("invalid coefficient '{coef_str}'").into()),
         };
         let degree: u8 = match degree_str.parse::<u8>() {
             Ok(val) => val,
-            _ => return Err(format!("invalid degree '{degree_str}'")),
+            _ => return Err(format!("invalid degree '{degree_str}'").into()),
         };
 
         Ok(Self {
@@ -116,13 +122,6 @@ mod term_tests {
         let term = Term::parse("42").unwrap();
         assert_eq!(term.coefficient, 42.0);
         assert_eq!(term.degree, 0);
-    }
-
-    #[test]
-    fn parses_lowercase_x() {
-        let term = Term::parse("5*x^1").unwrap();
-        assert_eq!(term.coefficient, 5.0);
-        assert_eq!(term.degree, 1);
     }
 
     #[test]

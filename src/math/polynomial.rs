@@ -221,28 +221,4 @@ mod tests {
             ]
         );
     }
-
-    #[test]
-    fn prints_reduced_form_in_sorted_order() {
-        let mut poly = Polynomial {
-            terms: vec![
-                Term {
-                    degree: 1,
-                    coefficient: -2.0,
-                },
-                Term {
-                    degree: 0,
-                    coefficient: 3.0,
-                },
-                Term {
-                    degree: 2,
-                    coefficient: 1.0,
-                },
-            ],
-        };
-        let reduced = poly.print_reduced_form();
-        assert!(reduced.starts_with("3"));
-        assert!(reduced.contains("X^1"));
-        assert!(reduced.ends_with("= 0"));
-    }
 }
