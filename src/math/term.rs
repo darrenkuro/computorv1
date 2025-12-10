@@ -22,21 +22,27 @@ impl Term {
 
         let mut components: Vec<&str> = term
             .split(|c| asterisks.contains(&c))
-            .filter(|s| !s.trim().is_empty())
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
             .collect();
 
         // Handle free entries
         match components.len() {
-            1 if components[0].contains('X') => components.insert(0, "1"), // 'X', coefficient = 1
+            1 if components[0].contains("-X") => components.insert(0, "-1"), // '-X', coefficient = -1
+            1 if components[0].contains('X') => components.insert(0, "1"),   // 'X', coefficient = 1
             1 => components.push("X^0"), // No 'X', only number, degree = 0
             2 => {}
             _ => return Err("syntax: invalid term structure!".to_string()),
         }
 
         // Guaranteed to have two components now
-        let (coef_str, var_str) = (components[0].trim(), components[1].trim());
-        let var_str = if var_str == "X" { "X^1" } else { var_str }; // Normalize "X"
-        let degree_str = var_str
+        let (coef_str, x_str) = (
+            components[0],
+            components[1].strip_prefix('-').unwrap_or(components[1]), //
+        );
+        let x_str = if x_str == "X" { "X^1" } else { x_str }; // Normalize "X"
+
+        let degree_str = x_str
             .strip_prefix("X^")
             .ok_or("syntax: expected prefix 'X^'")?;
 

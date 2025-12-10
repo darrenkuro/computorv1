@@ -92,8 +92,8 @@ impl Polynomial {
             d if d < 0f32 => {
                 let (re, im) = (-b / (2f32 * a), sqrt(-d) / (2f32 * a));
                 println!("The discriminant is strictly negative, the two solutions are:");
-                println!("{} + {}i", fract_or_float(re), fract_or_float(im));
-                println!("{} - {}i", fract_or_float(re), fract_or_float(im));
+                println!("{} + {}i", fract_or_float(re), fract_or_float(im.abs()));
+                println!("{} - {}i", fract_or_float(re), fract_or_float(im.abs()));
             }
             _ => {
                 println!("The discriminant is strictly zero, the only solution is:");

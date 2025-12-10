@@ -24,7 +24,8 @@ pub fn parse(args: &str) -> Result<Polynomial, Box<dyn Error>> {
     // Reformat - sign for easy processing
     let lhs = sides[0].replace("-", "+ -").replace("- ", "-");
 
-    let terms: Vec<&str> = lhs.split('+').collect();
+    let terms: Vec<&str> = lhs.split('+').filter(|s| !s.trim().is_empty()).collect();
+
     if terms.is_empty() {
         return Err("syntax: left side is empty!".into());
     }
