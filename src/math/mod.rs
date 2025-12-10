@@ -6,7 +6,11 @@ pub fn sqrt(x: f32) -> f32 {
         panic!("Cannot compute the square root of a negative number");
     }
 
-    let mut guess = x / 2.0;
+    if x == 0.0 {
+        return 0.0;
+    }
+
+    let mut guess = if x >= 1.0 { x / 2.0 } else { 1.0 };
 
     // Divide by x to use relative tolerance to prevent infinite loop
     while (guess * guess - x).abs() / x > 1e-6 {
@@ -22,8 +26,9 @@ mod tests {
 
     #[test]
     fn sqrt_test() {
-        assert_eq!(sqrt(0f32), 0f32);
-        assert_eq!(sqrt(4f32), 2f32);
-        assert_eq!(sqrt(9f32), 3f32);
+        let eps = 1e-5;
+        assert!((sqrt(0f32) - 0f32).abs() < eps);
+        assert!((sqrt(4f32) - 2f32).abs() < eps);
+        assert!((sqrt(9f32) - 3f32).abs() < eps);
     }
 }

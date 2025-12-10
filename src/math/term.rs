@@ -1,6 +1,4 @@
-use std::fmt;
-
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Term {
     pub degree: u8,
     pub coefficient: f32,
@@ -9,16 +7,31 @@ pub struct Term {
 impl Term {
     pub fn new(term: &str) -> Result<Self, String> {
         let asterisks = ['\u{002A}', '\u{2217}', '\u{2731}', '\u{204E}'];
+        let term = term.trim().replace('x', "X"); // Accept both x and X
+
+        // Check asterisk syntax ok before splitting
+        if asterisks
+            .iter()
+            .any(|&c| term.starts_with(c) || term.ends_with(c))
+        {
+            return Err("syntax: stray '*' at start or end of term!".to_string());
+        }
+
+        if term.contains("**") {
+            return Err("syntax: consecutive '*' found!".to_string());
+        }
+
         let mut components: Vec<&str> = term
             .split(|c| asterisks.contains(&c))
             .filter(|s| !s.trim().is_empty())
             .collect();
 
+        // Handle free entries
         match components.len() {
             1 if components[0].contains('X') => components.insert(0, "1"), // 'X', coefficient = 1
             1 => components.push("X^0"), // No 'X', only number, degree = 0
             2 => {}
-            _ => return Err("Syntax Error: invalid term structure!".to_string()),
+            _ => return Err("syntax: invalid term structure!".to_string()),
         }
 
         // Guaranteed to have two components now
@@ -26,14 +39,17 @@ impl Term {
         let var_str = if var_str == "X" { "X^1" } else { var_str }; // Normalize "X"
         let degree_str = var_str
             .strip_prefix("X^")
-            .ok_or("Syntax Error: expected prefix 'X^'")?;
+            .ok_or("syntax: expected prefix 'X^'")?;
 
-        let coefficient: f32 = coef_str
-            .parse()
-            .map_err(|_| format!("Syntax Error: invalid coefficient '{coef_str}'"))?;
-        let degree: u8 = degree_str
-            .parse()
-            .map_err(|_| format!("Syntax Error: invalid degree '{degree_str}'"))?;
+        let coefficient: f32 = match coef_str.parse::<f32>() {
+            Ok(val) if val.is_finite() => val,
+            // Could either be format or Nan/inf
+            _ => return Err(format!("invalid coefficient '{coef_str}'")),
+        };
+        let degree: u8 = match degree_str.parse::<u8>() {
+            Ok(val) => val,
+            _ => return Err(format!("invalid degree '{degree_str}'")),
+        };
 
         Ok(Self {
             coefficient,
@@ -41,56 +57,96 @@ impl Term {
         })
     }
 
-    pub fn to_full_form(term: &str) -> String {
-        let mut s = String::new();
-
-        
-    }
-}
-
-impl fmt::Display for Term {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    pub fn to_full_form(&self) -> String {
         if self.coefficient >= 0.0 {
-            write!(f, "{} * X^{}", self.coefficient, self.degree)
+            format!("{} * X^{}", self.coefficient, self.degree)
         } else if self.degree == 0 {
-            write!(f, "-{} * X^{}", -self.coefficient, self.degree)
+            // First to display, no space
+            format!("-{} * X^{}", -self.coefficient, self.degree)
         } else {
-            write!(f, "- {} * X^{}", -self.coefficient, self.degree)
+            format!("- {} * X^{}", -self.coefficient, self.degree)
+        }
+    }
+
+    pub fn to_free_form(&self) -> String {
+        if self.degree == 0 {
+            return format!("{}", self.coefficient);
+        }
+
+        let var = if self.degree == 1 {
+            "X".to_string()
+        } else {
+            format!("X^{}", self.degree)
+        };
+
+        match self.coefficient {
+            1.0 => var,
+            -1.0 => format!("- {}", var),
+            c if c < 0.0 => format!("- {} * {}", -c, var),
+            c => format!("{} * {}", c, var),
         }
     }
 }
-
-
-impl Free for Term {
-    fn free(&self) -> String {
-        if self.coefficient == 1 && self.degree == 1 {
-            "X"
-        } else if self.coefficient == -1 && self.degree == 1 {
-            "-X"
-        } else if self.degree == 1 {
-            format!("{} * X", self.coefficient)
-        }
-    }
-}
-
 
 #[cfg(test)]
 mod term_tests {
+    use super::*;
+
     #[test]
-    fn print() {
-        // let mut term = Term::new(10, 1.1);
-        // let mut buf = Vec::new();
-        // write!(buf, "{term}").unwrap();
-        // assert_eq!(String::from_utf8(buf).unwrap(), "1.1 * X^10");
+    fn parses_basic_term() {
+        let term = Term::new("3 * X^2").unwrap();
+        assert_eq!(term.coefficient, 3.0);
+        assert_eq!(term.degree, 2);
+    }
 
-        // buf = Vec::new();
-        // term = Term::new(10, 1.0);
-        // write!(buf, "{term}").unwrap();
-        // assert_eq!(String::from_utf8(buf).unwrap(), "1 * X^10");
+    #[test]
+    fn parses_implicit_coefficient() {
+        let term = Term::new("X^2").unwrap();
+        assert_eq!(term.coefficient, 1.0);
+        assert_eq!(term.degree, 2);
+    }
 
-        // buf = Vec::new();
-        // term = Term::new(10, -1.0);
-        // write!(buf, "{term}").unwrap();
-        // assert_eq!(String::from_utf8(buf).unwrap(), "1 * X^10");
+    #[test]
+    fn parses_number_only() {
+        let term = Term::new("42").unwrap();
+        assert_eq!(term.coefficient, 42.0);
+        assert_eq!(term.degree, 0);
+    }
+
+    #[test]
+    fn parses_lowercase_x() {
+        let term = Term::new("5*x^1").unwrap();
+        assert_eq!(term.coefficient, 5.0);
+        assert_eq!(term.degree, 1);
+    }
+
+    #[test]
+    fn rejects_invalid_term() {
+        assert!(Term::new("5*").is_err());
+        assert!(Term::new("*x^2").is_err());
+        assert!(Term::new("x^^2").is_err());
+        assert!(Term::new("abc").is_err());
+    }
+
+    #[test]
+    fn rejects_nan_inf() {
+        assert!(Term::new("inf*X^2").is_err());
+        assert!(Term::new("NaN*X^2").is_err());
+    }
+    #[test]
+    fn full_and_free_form_output() {
+        let term = Term {
+            coefficient: -1.0,
+            degree: 1,
+        };
+        assert_eq!(term.to_full_form(), "- 1 * X^1");
+        assert_eq!(term.to_free_form(), "- X");
+
+        let term = Term {
+            coefficient: 2.0,
+            degree: 3,
+        };
+        assert_eq!(term.to_full_form(), "2 * X^3");
+        assert_eq!(term.to_free_form(), "2 * X^3");
     }
 }

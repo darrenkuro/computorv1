@@ -1,41 +1,47 @@
 use crate::math::polynomial::Polynomial;
 use crate::math::term::Term;
 
-pub fn parse(args: &str) -> Result<Polynomial, String> {
+use std::error::Error;
+
+pub fn parse(args: &str) -> Result<Polynomial, Box<dyn Error>> {
+    let args = args.trim();
+    if args.is_empty() {
+        return Err("empty input!".into());
+    }
+
     // Divide into left and right sides
     let sides: Vec<&str> = args.split('=').collect();
     match sides.len() {
         2 => {} // Continue
-        1 => return Err("Syntax Error: missing '=' symbol!".to_string()),
-        0 => return Err("Syntax Error: empty input!".to_string()),
-        _ => return Err("Syntax Error: too many '=' symbols!".to_string()),
+        1 => return Err("syntax: missing '=' symbol!".into()),
+        _ => return Err("syntax: too many '=' symbols!".into()),
     }
 
     // Reformat - sign for easy processing
     let lhs = sides[0].replace("- ", "+ -");
     let terms: Vec<&str> = lhs.split('+').collect();
     if terms.is_empty() {
-        return Err("Syntax Error: left side is empty!".to_string());
+        return Err("syntax: left side is empty!".into());
     }
 
     let mut lhs = Polynomial::new();
     for term in terms {
         match Term::new(term) {
             Ok(term) => lhs.push_term(term),
-            Err(e) => return Err(e),
+            Err(e) => return Err(e.into()),
         }
     }
 
     let rhs = sides[1].replace("- ", "+ -");
     let terms: Vec<&str> = rhs.split('+').collect();
     if terms.is_empty() {
-        return Err("Syntax Error: right side is empty!".to_string());
+        return Err("syntax: right side is empty!".into());
     }
     let mut rhs = Polynomial::new();
     for term in terms {
         match Term::new(term) {
             Ok(term) => rhs.push_term(term),
-            Err(e) => return Err(e),
+            Err(e) => return Err(e.into()),
         }
     }
     Ok(lhs - rhs)
