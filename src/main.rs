@@ -14,16 +14,19 @@ fn main() -> Result<(), Box<dyn Error>> {
             buffer.trim().to_string()
         }
         _ => {
-            eprintln!("Usage: computor <eq> or echo <eq> | computor");
+            eprintln!("\x1b[33m[ Usage ] computor <eq> or echo <eq> | computor\x1b[0m");
             return Err("Wrong number of arguments!".into());
         }
     };
 
     let mut poly = parser::parse(&input)?;
 
-    println!("[ REDUCED FORM ] {}", poly.print_reduced_form());
-    println!("[ FREE ENTRY FORM ] {}", poly.print_free_form());
+    println!("[    REDUCED FORM   ] {}", poly.print_reduced_form());
     println!("[ POLYNOMIAL DEGREE ] {}", poly.get_degree());
+    println!(
+        "\x1b[33m[  FREE ENTRY FORM  ] {}\x1b[0m",
+        poly.print_free_form()
+    );
     poly.try_solve();
     Ok(())
 }
