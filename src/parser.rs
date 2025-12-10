@@ -22,7 +22,9 @@ pub fn parse(args: &str) -> Result<Polynomial, Box<dyn Error>> {
     }
 
     // Reformat - sign for easy processing
-    let lhs = sides[0].replace("- ", "+ -").replace("-", "+ -");
+    let lhs = sides[0].replace("-", "+ -").replace("- ", "-");
+
+    println!("lhs = {:#?}", lhs);
     let terms: Vec<&str> = lhs.split('+').collect();
     if terms.is_empty() {
         return Err("syntax: left side is empty!".into());
@@ -36,7 +38,7 @@ pub fn parse(args: &str) -> Result<Polynomial, Box<dyn Error>> {
         }
     }
 
-    let rhs = sides[1].replace("- ", "+ -").replace("-", "+ -");
+    let rhs = sides[1].replace("-", "+ -").replace("- ", "-");
     let terms: Vec<&str> = rhs.split('+').collect();
     if terms.is_empty() {
         return Err("syntax: right side is empty!".into());
