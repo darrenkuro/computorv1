@@ -1,7 +1,7 @@
 #[derive(Debug, Clone, PartialEq)]
 pub struct Term {
     pub degree: u8,
-    pub coefficient: f32,
+    pub coefficient: f64,
 }
 
 impl Term {
@@ -46,7 +46,7 @@ impl Term {
             .strip_prefix("X^")
             .ok_or("syntax: expected prefix 'X^'")?;
 
-        let coefficient: f32 = match coef_str.parse::<f32>() {
+        let coefficient: f64 = match coef_str.parse::<f64>() {
             Ok(val) if val.is_finite() => val,
             // Could either be format or Nan/inf
             _ => return Err(format!("invalid coefficient '{coef_str}'")),

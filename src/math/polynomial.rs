@@ -64,7 +64,7 @@ impl Polynomial {
 }
 
 impl Polynomial {
-    fn coefs(&self) -> (f32, f32, f32) {
+    fn coefs(&self) -> (f64, f64, f64) {
         let coeff_for = |deg| {
             self.terms
                 .iter()
@@ -77,27 +77,27 @@ impl Polynomial {
 
     fn solve_second_degree(&self) {
         let (a, b, c) = self.coefs();
-        let d = b * b - 4f32 * a * c;
+        let d = b * b - 4f64 * a * c;
 
         println!("\x1b[33m[ INTERMEDIATE STEP ] Discriminant = {b}² - 4 * {a} * {c} = {d}\x1b[0m");
         println!("\x1b[33m[ INTERMEDIATE STEP ] X = (-{b} ± √{d}) / (2 * {a})\x1b[0m");
 
         match d {
-            d if d > 0f32 => {
-                let (x1, x2) = ((-b - sqrt(d)) / (2f32 * a), (-b + sqrt(d)) / (2f32 * a));
+            d if d > 0f64 => {
+                let (x1, x2) = ((-b - sqrt(d)) / (2f64 * a), (-b + sqrt(d)) / (2f64 * a));
                 println!("The discriminant is strictly positive, the two solutions are:");
                 println!("{}", fract_or_float(x1));
                 println!("{}", fract_or_float(x2));
             }
-            d if d < 0f32 => {
-                let (re, im) = (-b / (2f32 * a), sqrt(-d) / (2f32 * a));
+            d if d < 0f64 => {
+                let (re, im) = (-b / (2f64 * a), sqrt(-d) / (2f64 * a));
                 println!("The discriminant is strictly negative, the two solutions are:");
                 println!("{} + {}i", fract_or_float(re), fract_or_float(im.abs()));
                 println!("{} - {}i", fract_or_float(re), fract_or_float(im.abs()));
             }
             _ => {
                 println!("The discriminant is strictly zero, the only solution is:");
-                println!("{}", fract_or_float(-b / (2f32 * a)));
+                println!("{}", fract_or_float(-b / (2f64 * a)));
             }
         }
     }
