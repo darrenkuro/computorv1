@@ -5,7 +5,7 @@ pub struct Term {
 }
 
 impl Term {
-    pub fn new(term: &str) -> Result<Self, String> {
+    pub fn parse(term: &str) -> Result<Self, String> {
         let asterisks = ['\u{002A}', '\u{2217}', '\u{2731}', '\u{204E}'];
 
         // Check asterisk syntax ok before splitting
@@ -93,44 +93,44 @@ mod term_tests {
 
     #[test]
     fn parses_basic_term() {
-        let term = Term::new("3 * X^2").unwrap();
+        let term = Term::parse("3 * X^2").unwrap();
         assert_eq!(term.coefficient, 3.0);
         assert_eq!(term.degree, 2);
     }
 
     #[test]
     fn parses_implicit_coefficient() {
-        let term = Term::new("X^2").unwrap();
+        let term = Term::parse("X^2").unwrap();
         assert_eq!(term.coefficient, 1.0);
         assert_eq!(term.degree, 2);
     }
 
     #[test]
     fn parses_number_only() {
-        let term = Term::new("42").unwrap();
+        let term = Term::parse("42").unwrap();
         assert_eq!(term.coefficient, 42.0);
         assert_eq!(term.degree, 0);
     }
 
     #[test]
     fn parses_lowercase_x() {
-        let term = Term::new("5*x^1").unwrap();
+        let term = Term::parse("5*x^1").unwrap();
         assert_eq!(term.coefficient, 5.0);
         assert_eq!(term.degree, 1);
     }
 
     #[test]
     fn rejects_invalid_term() {
-        assert!(Term::new("5*").is_err());
-        assert!(Term::new("*x^2").is_err());
-        assert!(Term::new("x^^2").is_err());
-        assert!(Term::new("abc").is_err());
+        assert!(Term::parse("5*").is_err());
+        assert!(Term::parse("*x^2").is_err());
+        assert!(Term::parse("x^^2").is_err());
+        assert!(Term::parse("abc").is_err());
     }
 
     #[test]
     fn rejects_nan_inf() {
-        assert!(Term::new("inf*X^2").is_err());
-        assert!(Term::new("NaN*X^2").is_err());
+        assert!(Term::parse("inf*X^2").is_err());
+        assert!(Term::parse("NaN*X^2").is_err());
     }
     #[test]
     fn full_and_free_form_output() {

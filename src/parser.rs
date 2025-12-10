@@ -1,6 +1,5 @@
 use crate::math::polynomial::Polynomial;
 use crate::math::term::Term;
-
 use std::error::Error;
 
 pub fn parse(args: &str) -> Result<Polynomial, Box<dyn Error>> {
@@ -9,6 +8,7 @@ pub fn parse(args: &str) -> Result<Polynomial, Box<dyn Error>> {
     if args.is_empty() {
         return Err("empty input!".into());
     }
+
     if !args.contains("X") {
         return Err("no unknown variable X (or x) to solve!".into());
     }
@@ -31,7 +31,7 @@ pub fn parse(args: &str) -> Result<Polynomial, Box<dyn Error>> {
 
     let mut lhs = Polynomial::new();
     for term in terms {
-        match Term::new(term) {
+        match Term::parse(term) {
             Ok(term) => lhs.push_term(term),
             Err(e) => return Err(e.into()),
         }
@@ -44,13 +44,13 @@ pub fn parse(args: &str) -> Result<Polynomial, Box<dyn Error>> {
     }
     let mut rhs = Polynomial::new();
     for term in terms {
-        match Term::new(term) {
+        match Term::parse(term) {
             Ok(term) => rhs.push_term(term),
             Err(e) => return Err(e.into()),
         }
     }
     let mut res = lhs - rhs;
-
     res.terms.sort_by_key(|t| t.degree);
+
     Ok(res)
 }

@@ -1,24 +1,9 @@
-use super::sqrt;
 use super::term::Term;
+use super::{fract_or_float, sqrt};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Polynomial {
     pub terms: Vec<Term>,
-}
-
-fn fract_or_float(x: f32) -> String {
-    let tol = 1e-9;
-    for den in 1..=100 {
-        let num = (x * den as f32).round();
-        if (x - num / den as f32).abs() < tol {
-            if den == 1 {
-                return format!("{}", num as i32);
-            } else {
-                return format!("{}/{}", num as i32, den);
-            }
-        }
-    }
-    format!("{:.6}", x)
 }
 
 impl Polynomial {
@@ -52,7 +37,7 @@ impl Polynomial {
     {
         let mut form = String::new();
         for term in &self.terms {
-            if term.degree == 0 {
+            if form.is_empty() {
                 form.push_str(&f(term));
             } else if term.coefficient < 0.0 {
                 form.push_str(&format!(" {}", f(term)));
@@ -60,6 +45,7 @@ impl Polynomial {
                 form.push_str(&format!(" + {}", f(term)));
             }
         }
+
         if form.is_empty() {
             form.push('0');
         }
@@ -258,27 +244,5 @@ mod tests {
         assert!(reduced.starts_with("3"));
         assert!(reduced.contains("X^1"));
         assert!(reduced.ends_with("= 0"));
-    }
-
-    #[test]
-    fn solves_first_degree() {
-        // 2 * X + 4 = 0 → X = -2
-        let poly = Polynomial {
-            terms: vec![
-                Term {
-                    degree: 1,
-                    coefficient: 2.0,
-                },
-                Term {
-                    degree: 0,
-                    coefficient: 4.0,
-                },
-            ],
-        };
-        // Capture output
-        use std::io::Write;
-        let mut buf = Vec::new();
-        let _ = writeln!(&mut buf, "{}", (-4.0 / 2.0)); // expected -2
-        assert_eq!((-4.0 / 2.0), -2.0);
     }
 }

@@ -20,6 +20,21 @@ pub fn sqrt(x: f32) -> f32 {
     guess
 }
 
+pub fn fract_or_float(x: f32) -> String {
+    let tol = 1e-9;
+    for den in 1..=100 {
+        let num = (x * den as f32).round();
+        if (x - num / den as f32).abs() < tol {
+            if den == 1 {
+                return format!("{}", num as i32);
+            } else {
+                return format!("{}/{}", num as i32, den);
+            }
+        }
+    }
+    format!("{:.6}", x)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
