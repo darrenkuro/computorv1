@@ -23,6 +23,7 @@ fn main() -> Result<(), String> {
     match parser::parse(&input) {
         Ok(mut poly) => {
             println!("Reduced form: {}", poly.print_form());
+            println!("Free from: {}", poly.print_free_form());
             println!("Polynomial degree: {}", poly.get_degree());
             poly.try_solve();
             Ok(())

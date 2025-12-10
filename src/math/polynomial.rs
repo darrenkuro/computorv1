@@ -47,6 +47,7 @@ impl Polynomial {
         form
     }
 
+
     fn solve_second_degree(&self) {
         let (mut a, mut b, mut c) = (0f32, 0f32, 0f32);
         let mut get_discriminant = |poly: &Polynomial| -> f32 {

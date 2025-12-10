@@ -40,17 +40,39 @@ impl Term {
             degree,
         })
     }
+
+    pub fn to_full_form(term: &str) -> String {
+        let mut s = String::new();
+
+        
+    }
 }
 
 impl fmt::Display for Term {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.coefficient >= 0.0 {
             write!(f, "{} * X^{}", self.coefficient, self.degree)
+        } else if self.degree == 0 {
+            write!(f, "-{} * X^{}", -self.coefficient, self.degree)
         } else {
             write!(f, "- {} * X^{}", -self.coefficient, self.degree)
         }
     }
 }
+
+
+impl Free for Term {
+    fn free(&self) -> String {
+        if self.coefficient == 1 && self.degree == 1 {
+            "X"
+        } else if self.coefficient == -1 && self.degree == 1 {
+            "-X"
+        } else if self.degree == 1 {
+            format!("{} * X", self.coefficient)
+        }
+    }
+}
+
 
 #[cfg(test)]
 mod term_tests {
