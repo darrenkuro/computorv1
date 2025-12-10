@@ -1,9 +1,26 @@
+use super::complex::Complex;
 use super::sqrt;
 use super::term::Term;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Polynomial {
     pub terms: Vec<Term>,
+}
+#[derive(Debug, Clone, PartialEq)]
+pub struct QuadraticResult<T> {
+    pub a: T,
+    pub b: T,
+    pub c: T,
+    pub discriminant: T,
+    pub roots: Vec<T>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Solution<T> {
+    None,
+    Infinite,
+    One(T),
+    Two(T, T),
 }
 
 impl Polynomial {
@@ -35,8 +52,6 @@ impl Polynomial {
     where
         F: Fn(&Term) -> String,
     {
-        self.terms.sort_by_key(|t| t.degree);
-
         let mut form = String::new();
         for term in &self.terms {
             if term.degree == 0 {
@@ -86,8 +101,8 @@ impl Polynomial {
         match d {
             d if d > 0f32 => {
                 println!("The discriminant is strictly positive, the two solutions are:");
-                println!("{}", (-b - sqrt(d)) / (2f32 * a));
-                println!("{}", (-b + sqrt(d)) / (2f32 * a));
+                let (ans1, ans2) = ((-b - sqrt(d)) / (2f32 * a), (-b + sqrt(d)) / (2f32 * a));
+                println!("{}, {}", ans1, ans2);
             }
             d if d < 0f32 => {
                 println!("The discriminant is strictly negative, the two solutions are:");
@@ -261,7 +276,7 @@ mod tests {
             ],
         };
         // Capture output
-        use std::io::{self, Write};
+        use std::io::Write;
         let mut buf = Vec::new();
         let _ = writeln!(&mut buf, "{}", (-4.0 / 2.0)); // expected -2
         assert_eq!((-4.0 / 2.0), -2.0);

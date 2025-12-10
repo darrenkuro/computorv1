@@ -24,7 +24,6 @@ pub fn parse(args: &str) -> Result<Polynomial, Box<dyn Error>> {
     // Reformat - sign for easy processing
     let lhs = sides[0].replace("-", "+ -").replace("- ", "-");
 
-    println!("lhs = {:#?}", lhs);
     let terms: Vec<&str> = lhs.split('+').collect();
     if terms.is_empty() {
         return Err("syntax: left side is empty!".into());
@@ -50,5 +49,8 @@ pub fn parse(args: &str) -> Result<Polynomial, Box<dyn Error>> {
             Err(e) => return Err(e.into()),
         }
     }
-    Ok(lhs - rhs)
+    let mut res = lhs - rhs;
+
+    res.terms.sort_by_key(|t| t.degree);
+    Ok(res)
 }
