@@ -4,7 +4,7 @@
     <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square&logo=opensourceinitiative&logoColor=white" alt="License"/>
     <img src="https://img.shields.io/badge/status-stable-brightgreen?style=flat-square&logo=git&logoColor=white" alt="Status">
     <img src="https://img.shields.io/badge/score-125%2F100-3CB371?style=flat-square&logo=42&logoColor=white" alt="Score"/>
-    <img src="https://img.shields.io/badge/date-Dec%2010th,%2C%202025-ff6984?style=flat-square&logo=Cachet&logoColor=white" alt="Date"/>
+    <img src="https://img.shields.io/badge/date-Dec%2010th,%202025-ff6984?style=flat-square&logo=Cachet&logoColor=white" alt="Date"/>
 </p>
 
 > A CLI program that parses, reduces, and solves polynomial equations up to the second degree.
@@ -31,15 +31,31 @@ Computor V1 is a lightweight mathematical expression solver written in Rust. It 
 
 ### Prerequisites
 
+- gnumake
+- Cargo
+
 ### Installation & Usage
+
+```bash
+git clone https://github.com/darrenkuro/computorv1.git && cd computorv1
+make
+
+./computor "5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0"
+```
 
 ### Examples & Demo
 
-### Development
+```bash
+$ ./computor "5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0"
+Reduced form: 4 * X^0 + 4 * X^1 - 9.3 * X^2 = 0
+Polynomial degree: 2
+Discriminant is strictly positive, the two solutions are:
+0.905239 and -0.475131
 
----
-
-## 📝 Notes & Lessons
+$ ./computor "42 * X^0 = 42 * X^0"
+Reduced form: 0 = 0
+All real numbers are solution.
+```
 
 ---
 
