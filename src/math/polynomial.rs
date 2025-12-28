@@ -80,7 +80,7 @@ impl Polynomial {
         let d = b * b - 4f64 * a * c;
 
         println!("\x1b[33m[ INTERMEDIATE STEP ] Discriminant = {b}² - 4 * {a} * {c} = {d}\x1b[0m");
-        println!("\x1b[33m[ INTERMEDIATE STEP ] X = (-{b} ± √{d}) / (2 * {a})\x1b[0m");
+        println!("\x1b[33m[ INTERMEDIATE STEP ] X = (-({b}) ± √{d}) / (2 * {a})\x1b[0m");
 
         match d {
             d if d > 0f64 => {
